@@ -6,25 +6,68 @@ import Show from './../Show';
 
 const testShow = {
     //add in approprate test data structure here.
+    name: 'Show Name',
+    summary: 'Show summary',
+    seasons: [
+        { id: 0, name: 'Season Name1', episodes: [] },
+        { id: 1, name: 'Season Name2', episodes: [] },
+        { id: 2, name: 'Season Name3', episodes: [] }
+    ]
 }
 
-test('renders testShow and no selected Season without errors', ()=>{
+const handleSelect = jest.fn();
+
+test('renders testShow and no selected Season without errors', () => {
+    render(<Show show={testShow} selectedSeason={'none'} />);
+    const showName = screen.queryByText('Show Name');
+    const showSummary = screen.queryByText('Show summary');
+
+    expect(showName).toBeInTheDocument();
+    expect(showSummary).toBeInTheDocument();
+
+
 });
 
 test('renders Loading component when prop show is null', () => {
+    render(<Show show={null} />);
+    const showLoading = screen.queryByTestId("loading-container");
+
+    expect(showLoading).toBeInTheDocument();
 });
 
-test('renders same number of options seasons are passed in', ()=>{
+test('renders same number of options seasons are passed in', () => {
+    render(<Show show={testShow} selectedSeason={'none'} />);
+    const selectOptions = screen.queryAllByTestId("season-option");
+
+    expect(selectOptions.length).toEqual(testShow.seasons.length)
 });
 
-test('handleSelect is called when an season is selected', () => {
+test('handleSelect is called when a season is selected', () => {
+    render(<Show show={testShow} selectedSeason={'none'} handleSelect={handleSelect} />);
+    const selectComponent = screen.queryByLabelText("Select A Season");
+
+    expect(selectComponent).toBeInTheDocument();
+    userEvent.selectOptions(selectComponent, ["1"], { bubbles: true });
+
+    expect(handleSelect).toHaveBeenCalledTimes(1);
 });
 
 test('component renders when no seasons are selected and when rerenders with a season passed in', () => {
+    render(<Show show={testShow} selectedSeason={'none'} />);
+
+    let episodesComponent = screen.queryByTestId("episodes-container");
+
+    expect(episodesComponent).not.toBeInTheDocument();
+
+    render(<Show show={testShow} selectedSeason={'1'} />)
+
+    episodesComponent = screen.queryByTestId("episodes-container");
+
+    expect(episodesComponent).toBeInTheDocument();
 });
 
 //Tasks:
-//1. Build an example data structure that contains the show data in the correct format. A show should contain a name, a summary and an array of seasons, each with a id, name and (empty) list of episodes within them. Use console.logs within the client code if you need to to verify the structure of show data.
+//1. Build an example data structure that contains the show data in the correct format. A show should contain a name, a summary and an array of seasons, each with an id, name and (empty) list of episodes within them. Use console.logs within the client code if you need to to verify the structure of show data.
 //2. Test that the Show component renders when your test data is passed in through show and "none" is passed in through selectedSeason.
 //3. Test that the Loading component displays when null is passed into the show prop (look at the Loading component to see how to test for it's existance)
 //4. Test that when your test data is passed through the show prop, the same number of season select options appears as there are seasons in your test data.
